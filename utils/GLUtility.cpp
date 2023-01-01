@@ -105,6 +105,7 @@ namespace GLUtility
 		else if (nrChannels == 4)
 			format = GL_RGBA;
 
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		GLuint texture;
 		glGenTextures(1, &texture);
 		glBindTexture(GL_TEXTURE_2D,texture);

@@ -8,8 +8,8 @@
 using namespace GLUtility;
 #pragma region vars
 
-const int WIN_WIDTH = 1920;
-const int WIN_HEIGHT = 1080;
+const int WIN_WIDTH = 1024;
+const int WIN_HEIGHT = 1024;
 
 ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
@@ -20,7 +20,7 @@ auto closeWindow = false;
 std::shared_ptr<Mesh> fsQuad;
 std::shared_ptr<GlslProgram> basicProgram;
 std::shared_ptr<FrameBuffer> layer1;
-std::shared_ptr<Texture2D> diffuseTex, specularTex;
+std::shared_ptr<Texture2D> diffuseTex;
 
 struct Framebuffer
 {
@@ -43,9 +43,14 @@ struct Framebuffer
 };
 std::shared_ptr<Framebuffer> blitContainer;
 
+std::map<std::string, std::shared_ptr<Texture2D>> texCache;
+std::map < std::string,std::string> texPaths;
+const char* tileImages[] = { "Classical Elegant","Colored Classical","Cark Elegant Classic","Elegant Classic Decor","Flat Design" };
+
 GLuint colorTile,imgTile;
 int tiles = 3;
 int tileMode = 0;
+int tileTexture = 0;
 
 #pragma endregion 
 
@@ -169,8 +174,6 @@ void initGL()
 {
     glEnable(GL_DEPTH_TEST);
 
-
-
     glViewport(0, 0, WIN_WIDTH, WIN_HEIGHT);
     glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
 
@@ -184,12 +187,11 @@ void initGL()
 
     layer1 = getFboMSA(nullptr, 4);
 
-    auto diffTex = GLUtility::makeTexture("img/container_diffuse.png");
-    auto specTex = GLUtility::makeTexture("img/container_specular.png");
+    auto diffTex = GLUtility::makeTexture("img/tiles/classical_elegant/sample.jpg");
+    
     diffuseTex = std::make_shared<GLUtility::Texture2D>();
     diffuseTex->texture = diffTex;
-    specularTex = std::make_shared<GLUtility::Texture2D>();
-    specularTex->texture = specTex;
+    texCache["img/tiles/classical_elegant/sample.jpg"] = diffuseTex;
 }
 
 void cleanGL()
@@ -223,10 +225,12 @@ void setupCamera() {
 void setupScene()
 {
    
-
+    texPaths[tileImages[0]] = "img/tiles/classical_elegant/sample.jpg";
+    texPaths[tileImages[1]] = "img/tiles/colored_classical/sample.jpg";
+    texPaths[tileImages[2]] = "img/tiles/dark_elegant_classic/sample.jpg";
+    texPaths[tileImages[3]] = "img/tiles/elegant_classic_decor/sample.jpg";
+    texPaths[tileImages[4]] = "img/tiles/flat_design/sample.jpg";
     fsQuad = GLUtility::getfsQuad();
-
-   
 
 }
 
@@ -313,7 +317,7 @@ void renderFrame()
     }
 
     basicProgram->setVec2f("resolution", glm::vec2(WIN_WIDTH,WIN_HEIGHT));
-    basicProgram->setFloat("tiles", tiles);
+    basicProgram->setFloat("tiles", (float)tiles);
     basicProgram->bindAllUniforms();
     fsQuad->draw();
 
@@ -338,12 +342,28 @@ void renderImgui()
 
         ImGui::InputInt("Tiles Resolution", &tiles, 1);
 
-        const char* items[] = { "AAAA", "BBBB" };
-
+        const char* tileModes[] = { "Color Tile", "Img Tile" };
+        
         //ImGui::BeginCombo("asdf", items[0]);
         
-        ImGui::Combo("Drop down", &tileMode,&items[0],2);
+        ImGui::Combo("Tile Mode", &tileMode,&tileModes[0],2);
         
+        if (tileMode == 1)
+        {
+            ImGui::Combo("Tile Texture", &tileTexture, &tileImages[0], 5);
+
+            if(texCache.find(tileImages[tileTexture]) == texCache.end())
+            {
+                auto tex = GLUtility::makeTexture(texPaths[tileImages[tileTexture]]);
+                auto tex2D = std::make_shared<Texture2D>();
+                tex2D->texture = tex;
+                texCache[tileImages[tileTexture]] = tex2D;
+            }
+            else
+            {
+                diffuseTex = texCache[tileImages[tileTexture]];
+            }
+        }
 
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
