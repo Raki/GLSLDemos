@@ -43,7 +43,9 @@ struct Framebuffer
 };
 std::shared_ptr<Framebuffer> blitContainer;
 
+GLuint colorTile,imgTile;
 int tiles = 3;
+int tileMode = 0;
 
 #pragma endregion 
 
@@ -174,6 +176,8 @@ void initGL()
 
     basicProgram = std::make_shared<GlslProgram>(Utility::readFileContents("shaders/vBasic.glsl"), Utility::readFileContents("shaders/fTiles.glsl"));
 
+    colorTile = glGetSubroutineIndex(basicProgram->programID, GL_FRAGMENT_SHADER, "getTileColor");
+    imgTile = glGetSubroutineIndex(basicProgram->programID, GL_FRAGMENT_SHADER, "getTileColorTex");
 
     setupScene();
     setupCamera();
@@ -298,6 +302,16 @@ void renderFrame()
   
     basicProgram->bind();
 
+    if(tileMode==0)
+        glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &colorTile);
+    else
+    {
+        glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &imgTile);
+        basicProgram->setInt("sampler", 0);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, diffuseTex->texture);
+    }
+
     basicProgram->setVec2f("resolution", glm::vec2(WIN_WIDTH,WIN_HEIGHT));
     basicProgram->setFloat("tiles", tiles);
     basicProgram->bindAllUniforms();
@@ -324,6 +338,12 @@ void renderImgui()
 
         ImGui::InputInt("Tiles Resolution", &tiles, 1);
 
+        const char* items[] = { "AAAA", "BBBB" };
+
+        //ImGui::BeginCombo("asdf", items[0]);
+        
+        ImGui::Combo("Drop down", &tileMode,&items[0],2);
+        
 
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
