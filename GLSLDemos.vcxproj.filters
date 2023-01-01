@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Example1.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="utils\GlslProgram.cpp">
       <Filter>utils</Filter>
     </ClCompile>
@@ -51,6 +48,9 @@
     <ClCompile Include="imgui-1.88\backends\imgui_impl_opengl3.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
+    <ClCompile Include="Example2.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="utils\CommonHeaders.h">
@@ -74,6 +74,9 @@
       <Filter>shaders</Filter>
     </None>
     <None Include="shaders\vBasic.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\fTiles.glsl">
       <Filter>shaders</Filter>
     </None>
   </ItemGroup>
