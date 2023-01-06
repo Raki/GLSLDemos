@@ -149,6 +149,7 @@ namespace GLUtility
 	GLuint makeVertexArrayObjectVec3(GLuint vbo, GLuint ibo);
 	GLuint makeTexture(string fileName);
 	GLuint makeTexture(string fileName,glm::vec2 &dim);
+	std::shared_ptr<Texture2D> makeTextureObject(string fileName);
 	GLuint makeCubeMap(vector<string> faces);
 	std::shared_ptr<FrameBuffer> makeFbo(int width,int height,int samples);
 	

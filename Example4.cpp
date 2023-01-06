@@ -10,6 +10,7 @@ using namespace GLUtility;
 
 const int WIN_WIDTH = 1024;
 const int WIN_HEIGHT = 768;
+const float viewAspectRatio = static_cast<float>(WIN_WIDTH) / static_cast<float>(WIN_HEIGHT);
 
 ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
@@ -31,6 +32,7 @@ std::shared_ptr<GlslProgram> aspectProgram;
 std::shared_ptr<FrameBuffer> layer1;
 std::shared_ptr<Texture2D> diffuseTex;
 std::vector<std::shared_ptr<Texture2D>> textures;
+int currentTex = 0;
 
 struct Framebuffer
 {
@@ -52,6 +54,8 @@ struct Framebuffer
     }
 };
 std::shared_ptr<Framebuffer> blitContainer;
+
+const std::vector<std::string> sampleTextures{"img/landscape.jpg","img/portrait.jpg"};
 
 GLuint normalColor;
 GLuint textureColor;
@@ -130,6 +134,24 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
     }
 }
 
+void calcAspect(float viewAspect, TextureInfo& texInfo) {
+    float imgAspect = (float)texInfo.dim.x / (float)texInfo.dim.y;;
+    texInfo.aspectScale = glm::vec2(1);
+    if (imgAspect > viewAspect) {
+        texInfo.aspectScale.y = viewAspect / imgAspect;
+    }
+    else {
+        texInfo.aspectScale.x = imgAspect / viewAspect;
+    }
+};
+
+void updateTextureInfo(std::shared_ptr<Texture2D> tex,std::string path)
+{
+    textureInfo.dim = glm::vec2(tex->width, tex->height);
+    textureInfo.texture = tex->texture;
+    textureInfo.path = path;
+    calcAspect(viewAspectRatio, textureInfo);
+}
 
 void createWindow()
 {
@@ -188,28 +210,18 @@ void initGL()
     setupScene();
     setupCamera();
 
-    glm::vec2 texDim;
-    auto tex = GLUtility::makeTexture("img/landscape.jpg", texDim);
+    //glm::vec2 texDim;
+    //auto tex = GLUtility::makeTexture("img/landscape.jpg", texDim);
     
-    textureInfo.dim = texDim;
-    textureInfo.texture = tex;
-    textureInfo.path = "";
+    for (const auto& path : sampleTextures)
+    {
+        auto tex = GLUtility::makeTextureObject(path);
+        textures.push_back(tex);
+    }
 
-    diffuseTex = std::make_shared<Texture2D>();
-    diffuseTex->texture = tex;
-
-    float viewAspectRatio = (float)WIN_WIDTH / (float)WIN_HEIGHT;
-    auto calcAspect = [](float viewAspect, TextureInfo& texInfo) {
-        float imgAspect = (float)texInfo.dim.x / (float)texInfo.dim.y;;
-        if (imgAspect > viewAspect) {
-            texInfo.aspectScale.y = viewAspect / imgAspect;
-        }
-        else {
-            texInfo.aspectScale.x = imgAspect / viewAspect;
-        }
-    };
-
-    calcAspect(viewAspectRatio, textureInfo);
+    diffuseTex = textures.at(0);
+    
+    updateTextureInfo(diffuseTex,sampleTextures.at(0));
     
     layer1 = getFboMSA(nullptr, 4);
 
@@ -237,16 +249,14 @@ void initImgui()
     //"#version 130"
 }
 
-void setupCamera() {
-
+void setupCamera()
+{
    
 }
 
 void setupScene()
 {
-   
     fsQuad = GLUtility::getfsQuad();
-
 }
 
 
@@ -306,18 +316,12 @@ void updateFrame()
 {
     auto t = glfwGetTime() * 20;
     auto theta = (int)t % 360;
-
-   
-
-
 }
 
 void renderFrame()
 {
-
     glBindFramebuffer(GL_FRAMEBUFFER, layer1->fbo);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
   
     aspectProgram->bind();
 
@@ -332,7 +336,6 @@ void renderFrame()
     fsQuad->draw();
 
     aspectProgram->unbind();
-
 
     //blitting
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -350,8 +353,19 @@ void renderImgui()
     {
         ImGui::Begin("Display image with aspect ratio");
 
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        const char* images[] = {"img/landscape.jpg","img/portrait.jpg"};
+        int prevInd = currentTex;
+        ImGui::Combo("Image", &currentTex, images,2);
+        
+        //This is a dirty hack
+        if (prevInd != currentTex)
+        {
+            diffuseTex = textures.at(currentTex);
+            updateTextureInfo(diffuseTex, sampleTextures.at(currentTex));
+        }
+        
 
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
         ImGui::End();
     }
     
@@ -382,21 +396,15 @@ int main()
 
     while (!glfwWindowShouldClose(window))
     {
-
         updateFrame();
         renderFrame();
-
         renderImgui();
-
-
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
     glfwDestroyWindow(window);
-
-
 
     glfwTerminate();
     exit(EXIT_SUCCESS);

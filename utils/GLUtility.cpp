@@ -154,6 +154,41 @@ namespace GLUtility
 		return texture;
 	}
 
+	std::shared_ptr<Texture2D> makeTextureObject(string fileName)
+	{
+		int width, height, nrChannels;
+
+		stbi_set_flip_vertically_on_load(1);
+		unsigned char* data = stbi_load(fileName.c_str(), &width, &height, &nrChannels, 0);
+
+		GLenum format = GL_RGB;
+		if (nrChannels == 1)
+			format = GL_RED;
+		else if (nrChannels == 3)
+			format = GL_RGB;
+		else if (nrChannels == 4)
+			format = GL_RGBA;
+
+		GLuint texture;
+		glGenTextures(1, &texture);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		stbi_image_free(data);
+		auto tex = std::make_shared<Texture2D>();
+		tex->texture = texture;
+		tex->width = static_cast<uint16_t>(width);
+		tex->height = static_cast<uint16_t>(height);
+
+		return tex;
+	}
+
 	GLuint makeCubeMap(vector<string> faces)
 	{
 		if(faces.size()<6)
