@@ -48,7 +48,7 @@
     <ClCompile Include="imgui-1.88\backends\imgui_impl_opengl3.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="Example3.cpp">
+    <ClCompile Include="Example4.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
@@ -80,6 +80,12 @@
       <Filter>shaders</Filter>
     </None>
     <None Include="shaders\fRayTrace.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\vAspect.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\fTexture.glsl">
       <Filter>shaders</Filter>
     </None>
   </ItemGroup>
