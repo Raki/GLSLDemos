@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Example6.cpp" />
+    <ClCompile Include="Example7.cpp" />
     <ClCompile Include="imgui-1.88\backends\imgui_impl_glfw.cpp" />
     <ClCompile Include="imgui-1.88\backends\imgui_impl_opengl3.cpp" />
     <ClCompile Include="imgui-1.88\imgui.cpp" />
@@ -42,6 +42,7 @@
   <ItemGroup>
     <None Include="shaders\fBasic.glsl" />
     <None Include="shaders\fBlend.glsl" />
+    <None Include="shaders\fAdditive.glsl" />
     <None Include="shaders\fDiff.glsl" />
     <None Include="shaders\fRayTrace.glsl" />
     <None Include="shaders\fTexture.glsl" />
