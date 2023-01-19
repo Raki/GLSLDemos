@@ -43,3 +43,9 @@ Difference between two images in glsl
 
 ![image](https://user-images.githubusercontent.com/824691/213334940-73b545d9-061d-45ed-b89a-e6b6936509d4.png)
 
+* Example7
+
+Basic bloom using glsl
+
+![image](https://user-images.githubusercontent.com/824691/213353092-827acba1-04bc-4072-b200-88743864c83e.png)
+
