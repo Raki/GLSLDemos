@@ -83,7 +83,6 @@ void renderFrame();
 void renderImgui();
 
 void applyBlur(std::shared_ptr<GLUtility::FrameBuffer> fboContainer, TextureInfo texInfo);
-void applyVBluer(std::shared_ptr<GLUtility::FrameBuffer> fboContainer);
 #pragma endregion
 
 
@@ -357,7 +356,7 @@ void updateFrame()
 {
     auto t = glfwGetTime() * 20;
     auto theta = (int)t % 180;
-    //bFactor = sin(glm::radians(static_cast<float>(theta)));
+    blurRadius= sin(glm::radians(static_cast<float>(theta)))*20;
 }
 
 void renderFrame()
@@ -378,7 +377,6 @@ void renderFrame()
   
     blendProgram->bind();
 
-    glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &textureColor);
     blendProgram->setInt("sampler1", 0);
     blendProgram->setInt("sampler2", 1);
     blendProgram->setVec2f("scaleFactrs", glm::vec2(1));
@@ -408,7 +406,7 @@ void renderImgui()
         if (prevT1 != pickedTex1)
             renderFbo1 = true;
 
-        ImGui::SliderFloat("Blur Radius", &blurRadius,0,20);
+        ImGui::SliderFloat("Blur Radius", &blurRadius,1,20);
 
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
         ImGui::End();
