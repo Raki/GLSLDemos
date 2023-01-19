@@ -36,3 +36,10 @@ This project is using vs2020 to build things. It uses __vcpkg__ to get the neces
  Example to blend images of different aspect ratios in glsl
 
 ![image](https://user-images.githubusercontent.com/824691/210927591-7307af99-c442-468c-bbba-2cce5b2e3011.png)
+
+* Example6
+
+Difference between two images in glsl
+
+![image](https://user-images.githubusercontent.com/824691/213334940-73b545d9-061d-45ed-b89a-e6b6936509d4.png)
+
