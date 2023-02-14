@@ -1,4 +1,6 @@
 #include "GLUtility.h"
+#include "Utility.h"
+#include <webp/decode.h>
 
 #define SMALL_NUM   0.00000001 // anything that avoids division overflow
 #define STB_IMAGE_IMPLEMENTATION
@@ -92,10 +94,25 @@ namespace GLUtility
 	//ToDo : check if file is missing
 	GLuint makeTexture(string fileName)
 	{
-		int width, height, nrChannels;
+		if(!std::filesystem::exists(fileName));
+		return 0;
+
+		auto ext = std::filesystem::path(fileName).extension().string();
 		
-		stbi_set_flip_vertically_on_load(1);
-		unsigned char* data = stbi_load(fileName.c_str(), &width, &height, &nrChannels, 0);
+		int width, height, nrChannels;
+		unsigned char* data = nullptr;
+		
+		if (ext.compare("webp") == 0)
+		{
+			auto webpData = Utility::readBinaryFileContents(fileName);
+			data = WebPDecodeRGBA(webpData.data(), webpData.size(), &width, &height);
+			nrChannels = 4;
+		}
+		else
+		{
+			stbi_set_flip_vertically_on_load(1);
+			data = stbi_load(fileName.c_str(), &width, &height, &nrChannels, 0);
+		}
 		
 		GLenum format;
 		if (nrChannels == 1)
@@ -116,21 +133,45 @@ namespace GLUtility
 		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 
-		stbi_image_free(data);
+		if (ext.compare("webp") == 0)
+		{
+			WebPFree(data);
+		}
+		else
+		{
+			stbi_image_free(data);
+		}
 
 		return texture;
 	}
 
+	//ToDo : check if file is missing, support for WebP
 	GLuint makeTexture(string fileName, glm::vec2& dim)
 	{
-		int width, height, nrChannels;
 
-		stbi_set_flip_vertically_on_load(1);
-		unsigned char* data = stbi_load(fileName.c_str(), &width, &height, &nrChannels, 0);
-		dim.x = (float)width;
-		dim.y = (float)height;
+		auto ext = std::filesystem::path(fileName).extension().string();
 
-		GLenum format= GL_RGB;
+		int width=0, height, nrChannels;
+		unsigned char* data = nullptr;
+
+		if (ext.compare(".webp") == 0)
+		{
+			auto webpData = Utility::readBinaryFileContents(fileName);
+			struct WebPBitstreamFeatures streamFeat;
+			auto status = WebPGetFeatures(webpData.data(), webpData.size(), &streamFeat);
+			data = WebPDecodeRGBA(webpData.data(), webpData.size(), &width, &height);
+			nrChannels = (streamFeat.has_alpha == 1) ? 4 : 3;
+		}
+		else
+		{
+			stbi_set_flip_vertically_on_load(1);
+			data = stbi_load(fileName.c_str(), &width, &height, &nrChannels, 0);
+		}
+
+		dim.x = static_cast<float>(width);
+		dim.y = static_cast<float>(height);
+
+		GLenum format;
 		if (nrChannels == 1)
 			format = GL_RED;
 		else if (nrChannels == 3)
@@ -138,6 +179,7 @@ namespace GLUtility
 		else if (nrChannels == 4)
 			format = GL_RGBA;
 
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		GLuint texture;
 		glGenTextures(1, &texture);
 		glBindTexture(GL_TEXTURE_2D, texture);
@@ -145,46 +187,29 @@ namespace GLUtility
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 
-		stbi_image_free(data);
+		if (ext.compare(".webp") == 0)
+		{
+			WebPFree(data);
+		}
+		else
+		{
+			stbi_image_free(data);
+		}
 
 		return texture;
 	}
 
 	std::shared_ptr<Texture2D> makeTextureObject(string fileName)
 	{
-		int width, height, nrChannels;
-
-		stbi_set_flip_vertically_on_load(1);
-		unsigned char* data = stbi_load(fileName.c_str(), &width, &height, &nrChannels, 0);
-
-		GLenum format = GL_RGB;
-		if (nrChannels == 1)
-			format = GL_RED;
-		else if (nrChannels == 3)
-			format = GL_RGB;
-		else if (nrChannels == 4)
-			format = GL_RGBA;
-
-		GLuint texture;
-		glGenTextures(1, &texture);
-		glBindTexture(GL_TEXTURE_2D, texture);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-
-		stbi_image_free(data);
+		glm::vec2 dim;
+		auto texture = makeTexture(fileName,dim);
 		auto tex = std::make_shared<Texture2D>();
 		tex->texture = texture;
-		tex->width = static_cast<uint16_t>(width);
-		tex->height = static_cast<uint16_t>(height);
+		tex->width = static_cast<uint16_t>(dim.x);
+		tex->height = static_cast<uint16_t>(dim.y);
 
 		return tex;
 	}

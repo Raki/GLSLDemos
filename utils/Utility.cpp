@@ -12,12 +12,36 @@ namespace Utility
         buffer << t.rdbuf();
         return buffer.str();
     }
+
+    std::vector<unsigned char> readBinaryFileContents(const std::string filename)
+    {
+        // binary mode is only for switching off newline translation
+        std::ifstream file(filename, std::ios::binary);
+        file.unsetf(std::ios::skipws);
+
+        std::streampos file_size;
+        file.seekg(0, std::ios::end);
+        file_size = file.tellg();
+        file.seekg(0, std::ios::beg);
+
+        std::vector<unsigned char> vec;
+        vec.reserve(file_size);
+        vec.insert(vec.begin(),
+            std::istream_iterator<unsigned char>(file),
+            std::istream_iterator<unsigned char>());
+        return (vec);
+    }
     
     void savePngFile(std::string filename,int w, int h, int comp, unsigned char *data)
     {
         //int stbi_write_png(char const *filename, int w, int h, int comp, const void *data, int stride_in_bytes);
         stbi_flip_vertically_on_write(1);
         stbi_write_png("test.png",w,h,comp,data,w*comp);
+    }
+
+    void pngToWebP(std::string filename)
+    {
+
     }
     
     vector<string> split(string str, string delim)

@@ -9,9 +9,10 @@ namespace Utility
 		glm::vec2 position;
 	};
 	string readFileContents(string filePath);
-
+	std::vector<unsigned char> readBinaryFileContents(const std::string filename);
 
 	void savePngFile(std::string filename, int w, int h, int comp, unsigned char* data);
+	void pngToWebP(std::string filename);
 
 	/*
 	* @param str string with the content
