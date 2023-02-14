@@ -58,8 +58,8 @@ struct Framebuffer
     }
 };
 
-const char* images[] = { "img/landscape.jpg","img/portrait.jpg","img/JohnGreen7.png", "img/Lenna.png" };
-const std::vector<std::string> sampleTextures{"img/landscape.jpg","img/portrait.jpg","img/JohnGreen7.png", "img/Lenna.png" };
+const char* images[] = { "img/landscape.jpg","img/portrait.jpg","img/JohnGreen7.png", "img/Lenna.png","img/1_webp_ll.webp"};
+const std::vector<std::string> sampleTextures{"img/landscape.jpg","img/portrait.jpg","img/JohnGreen7.png", "img/Lenna.png","img/1_webp_ll.webp"};
 
 GLuint normalColor;
 GLuint textureColor;
@@ -209,6 +209,8 @@ void createWindow()
 void initGL()
 {
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glViewport(0, 0, WIN_WIDTH, WIN_HEIGHT);
     glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
