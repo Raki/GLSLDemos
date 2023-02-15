@@ -1,6 +1,7 @@
 #include "GLUtility.h"
 #include "Utility.h"
 #include <webp/decode.h>
+#include <webp/encode.h>
 
 #define SMALL_NUM   0.00000001 // anything that avoids division overflow
 #define STB_IMAGE_IMPLEMENTATION
@@ -291,6 +292,56 @@ namespace GLUtility
 
 
 		return fbObj;
+	}
+
+	void pngToWebP(std::string fileName)
+	{
+		//ToDo: Solve Bugs
+		return;
+		int width, height, nrChannels;
+		unsigned char* data = nullptr;
+
+		data = stbi_load(fileName.c_str(), &width, &height, &nrChannels, STBI_rgb_alpha);
+
+		unsigned char* pngData;
+		//unsigned char sample[] = {
+		//	 255, 255, 255, 255, // white
+		//	255, 0, 0, 255, // red
+		//	0, 255, 0, 255, // green
+		//	0, 0, 255, 255, // blue
+		//};
+
+		//unsigned char sample2[] = {
+		//	255, 255, 255, // white
+		//	255, 0, 0, // red
+		//	0, 255, 0, // green
+		//	0, 0, 255, // blue
+		//};
+		size_t size=0;
+		if(nrChannels==4)
+			size = WebPEncodeRGBA(data, width, height, width * nrChannels, 100, &pngData);
+		else 
+			size = WebPEncodeLosslessRGB(data, width, height, width * nrChannels, &pngData);
+		int w = 2;
+		int h = 2;
+		int s = w * 4;
+		//size = WebPEncodeRGBA(sample, w, h, s, 100, &pngData);
+
+		auto fName = std::filesystem::path(fileName+".webp").filename().string();
+		Utility::saveBinaryFile(fName, pngData, size);
+	}
+
+	void saveWebP(int w, int h, int comp, std::string filename, unsigned char* data, size_t size)
+	{
+		int width = w;
+		int height = h;
+		unsigned char* imgData;
+		if (comp == 4)
+			size = WebPEncodeRGBA(data, width, height, width * comp, 100, &imgData);
+		else
+			size = WebPEncodeLosslessRGB(data, width, height, width * comp, &imgData);
+		Utility::saveBinaryFile(filename, imgData, size);
+		WebPFree(imgData);
 	}
 
 	void checkFrambufferStatus(GLuint fbo)

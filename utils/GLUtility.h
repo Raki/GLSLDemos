@@ -152,7 +152,8 @@ namespace GLUtility
 	std::shared_ptr<Texture2D> makeTextureObject(string fileName);
 	GLuint makeCubeMap(vector<string> faces);
 	std::shared_ptr<FrameBuffer> makeFbo(int width,int height,int samples);
-	
+	void pngToWebP(std::string filename);
+	void saveWebP(int w,int h,int comp,std::string filename,unsigned char* data, size_t size);
 	
 
 	void checkFrambufferStatus(GLuint fbo);

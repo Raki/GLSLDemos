@@ -32,16 +32,18 @@ namespace Utility
         return (vec);
     }
     
-    void savePngFile(std::string filename,int w, int h, int comp, unsigned char *data)
+    void savePngFile(std::string filename,int w, int h, int comp, unsigned char *data,int flip_vert)
     {
         //int stbi_write_png(char const *filename, int w, int h, int comp, const void *data, int stride_in_bytes);
-        stbi_flip_vertically_on_write(1);
+        stbi_flip_vertically_on_write(flip_vert);
         stbi_write_png("test.png",w,h,comp,data,w*comp);
     }
 
-    void pngToWebP(std::string filename)
+    void saveBinaryFile(std::string filename, unsigned char* data, size_t size)
     {
-
+        std::ofstream file(filename, std::ios::binary);
+        file.write((char*)data, size);
+        file.close();
     }
     
     vector<string> split(string str, string delim)
