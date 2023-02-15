@@ -26,6 +26,7 @@ GLFWwindow* window;
 auto closeWindow = false;
 auto renderFbo1 = true;
 auto renderFbo2 = true;
+auto captureFram = false;
 
 std::shared_ptr<Mesh> fsQuad;
 std::shared_ptr<GlslProgram> aspectProgram,blendProgram;
@@ -208,6 +209,7 @@ void createWindow()
 
 void initGL()
 {
+    GLUtility::pngToWebP("img/Lenna.png");
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -384,6 +386,16 @@ void renderFrame()
     fsQuad->draw();
 
     blendProgram->unbind();
+
+
+    if (captureFram)
+    {
+        captureFram = false;
+        auto * pixels = new GLubyte[WIN_WIDTH*WIN_HEIGHT*4];
+        glReadPixels(0, 0, WIN_WIDTH, WIN_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+        GLUtility::saveWebP(WIN_WIDTH, WIN_HEIGHT, 4, "temp.web", pixels, WIN_WIDTH * WIN_HEIGHT * 4);
+    }
+
 }
 
 void renderImgui()
