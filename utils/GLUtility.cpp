@@ -95,8 +95,8 @@ namespace GLUtility
 	//ToDo : check if file is missing
 	GLuint makeTexture(string fileName)
 	{
-		if(!std::filesystem::exists(fileName));
-		return 0;
+		//if(!std::filesystem::exists(fileName));
+		//return 0;
 
 		auto ext = std::filesystem::path(fileName).extension().string();
 		
